@@ -1,0 +1,84 @@
+name: build and publish
+
+on:
+  push:
+    branches:
+      - "main"
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          registry-url: "https://registry.npmjs.org"
+          cache: 'npm'
+
+      - name: Setup NPM
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Check Release Version
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+            echo $old_status_code
+            version=v$(cat package.json | jq .version -r)
+            release_exists=1
+            while [ $release_exists == 1 ]; do
+            echo "Checking if release ${version} exists"
+            status_code=$(
+                curl -I --location "https://api.github.com/repos/EladHeller/hebrew-names/releases/tags/${version}" \
+                --header "Authorization: token ${{ secrets.GITHUB_TOKEN }}" | grep "HTTP/2" | cut -d' ' -f 2
+            )
+            if [ "$status_code" == "404" ]; then
+                echo "Release $version does not exist"
+                release_exists=0
+            elif [ "$status_code" == "200" ]; then
+                echo "Release $version exists, incrementing patch"
+                npm version patch --no-git-tag-version
+                version=v$(cat package.json | jq .version -r)
+            else
+                echo "Got unexpected status code $status_code"
+                exit 1
+            fi
+            done
+            echo "RELEASE_VERSION=${version}" >> $GITHUB_ENV
+      - name: Commit & Push Files
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+          status=$(git status --porcelain)
+  
+          if [ -n "$status" ]; then
+            git config --global user.email "github-actions[bot]@users.noreply.github.com"
+            git config --global user.name "Elad Heller"
+        
+            git add .
+            git commit -m "Release: Version ${RELEASE_VERSION}."
+            git push origin main
+          fi
+
+      - name: Create Release
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: |
+            commit_hash=$(git log -1 --pretty=format:'%H')
+            echo "commit_hash: $commit_hash"
+            payload=$(
+                jq -n -c '{tag_name:$version,target_commitish:$commit_hash,name:$version}' \
+                --arg version "$RELEASE_VERSION" \
+                --arg commit_hash "$commit_hash"
+            )
+            echo $payload
+            curl --request POST "https://api.github.com/repos/EladHeller/hebrew-names/releases" \
+                --header "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                --header "Accept: application/vnd.github.v3+json" \
+                --header "Content-Type: application/json" \
+                --data-raw "${payload}"
+      - name: Publish
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: npm publish

@@ -1,0 +1,32 @@
+{
+  "name": "find-hebrew-names",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "rm -rf ./dist && tsc",
+    "test": "jest --coverage",
+    "lint:test": "eslint ./src/**/*.ts ./src/*.ts --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "test:ci": "npm run lint:test && npm run type-check && npm run test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "description": "Extract Hebrew full names from text",
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^18.15.11",
+    "@typescript-eslint/eslint-plugin": "^8.16.0",
+    "@typescript-eslint/parser": "^8.16.0",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jest": "^28.9.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.0.0"
+  }
+}

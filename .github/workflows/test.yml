@@ -1,0 +1,43 @@
+name: lint and test
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  CI:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Print GITHUB_REF for code coverage
+        run: echo "**--GITHUB_REF=${GITHUB_REF}--**"
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules-v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+
+      - name: Install modules
+        run: npm ci
+        
+      - name: Run ESLint
+        run: npm run lint:test
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Unit test
+        run: npm test
+
+
+
