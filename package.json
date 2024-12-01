@@ -1,9 +1,11 @@
 {
   "name": "find-hebrew-names",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "homepage": "https://github.com/EladHeller/hebrew-names",
   "scripts": {
     "build": "rm -rf ./dist && tsc",
