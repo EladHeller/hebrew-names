@@ -3,9 +3,18 @@ name: build and publish
 on:
   push:
     branches:
-      - "main"
+      - "master"
 jobs:
   publish:
+    permissions:
+      contents: write
+      discussions: write
+      id-token: write
+      statuses: write
+      actions: write
+      pull-requests: write
+      issues: write
+      checks: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -25,7 +34,7 @@ jobs:
         run: npm run build
 
       - name: Check Release Version
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         run: |
             echo $old_status_code
             version=v$(cat package.json | jq .version -r)
@@ -50,7 +59,7 @@ jobs:
             done
             echo "RELEASE_VERSION=${version}" >> $GITHUB_ENV
       - name: Commit & Push Files
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         run: |
           status=$(git status --porcelain)
   
@@ -60,11 +69,11 @@ jobs:
         
             git add .
             git commit -m "Release: Version ${RELEASE_VERSION}."
-            git push origin main
+            git push origin master
           fi
 
       - name: Create Release
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         run: |
             commit_hash=$(git log -1 --pretty=format:'%H')
             echo "commit_hash: $commit_hash"
@@ -80,5 +89,5 @@ jobs:
                 --header "Content-Type: application/json" \
                 --data-raw "${payload}"
       - name: Publish
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
         run: npm publish
