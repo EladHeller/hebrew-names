@@ -1,4 +1,4 @@
-# hebrew-names
+# Find hebrew names
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![npm version](https://img.shields.io/npm/v/find-hebrew-names.svg)](https://www.npmjs.com/package/find-hebrew-names)
@@ -15,11 +15,11 @@ Extract Hebrew full names from text based on Israel Central Bureau of Statistics
 
 ## Installation
 ```bash
-npm install hebrew-names
+npm install find-hebrew-names
 ```
 ## Usage
 ```ts
-import findHebrewFullNames from 'hebrew-names';
+import findHebrewFullNames from 'find-hebrew-names';
 
 const text = 'אני הלכתי לבית הכנסת עם משה כהן ויהונתן לוי';
 const names = findHebrewFullNames(text);
